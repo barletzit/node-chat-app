@@ -10,7 +10,7 @@ type ChatMessage = {
   type: "user" | "system";
 };
 
-const PORT = 3000;
+const PORT = process.env.PORT;
 
 const app = express();
 const server = http.createServer(app);

@@ -1,5 +1,6 @@
 import { createContext, useCallback, useEffect, useState } from "react";
 import { io, Socket } from "socket.io-client";
+import { config } from "../config";
 
 type SocketContextType = {
   socket: Socket | null;
@@ -8,6 +9,7 @@ type SocketContextType = {
   isConnected: boolean;
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const SocketContext = createContext<SocketContextType | null>(null);
 
 export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
@@ -15,7 +17,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
   const [isConnected, setIsConnected] = useState(false);
 
   const connect = useCallback((username: string) => {
-    const newSocket = io("http://localhost:3000", {
+    const newSocket = io(config.serverUrl, {
       auth: { username },
     });
 
