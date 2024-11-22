@@ -98,9 +98,10 @@ VITE_SERVER_URL=http://localhost:3000
 ## Usage
 
 1. Open the application in your browser
-2. Enter a username to join the chat
-3. Start sending messages
-4. Use the disconnect button to leave the chat
+2. Open another tab in your browser
+3. Enter a username to join the chat in both tabs
+4. Start sending messages
+5. Use the disconnect button to leave the chat
 
 ## Socket Events
 
