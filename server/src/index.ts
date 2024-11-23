@@ -4,6 +4,7 @@ import http from "http";
 import cors from "cors";
 import { handleLogin, handleRegister } from "./auth";
 import { handleSocket } from "./socket";
+import { authMiddleware } from "./middlewares/auth.middleware";
 
 type ChatMessage = {
   id: string;
@@ -32,7 +33,7 @@ const io = new Server(server, {
 app.use(cors(corsOptions));
 app.use(express.json());
 
-app.get("/", (req, res) => {
+app.get("/", authMiddleware, (req, res) => {
   res.send("Hello World");
 });
 
