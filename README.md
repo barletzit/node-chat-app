@@ -1,3 +1,5 @@
+Here's the updated README with the latest features and structure:
+
 # Real-Time Chat Application
 
 A real-time chat application built with React, TypeScript, Socket.IO, and Material-UI.
@@ -5,6 +7,8 @@ A real-time chat application built with React, TypeScript, Socket.IO, and Materi
 ## Features
 
 - Real-time messaging
+- User authentication with JWT
+- Session-based login (tab-specific)
 - Dark theme
 - Connection status tracking
 - System messages for connection events
@@ -19,6 +23,8 @@ A real-time chat application built with React, TypeScript, Socket.IO, and Materi
   - TypeScript
   - Material-UI (MUI)
   - Socket.IO Client
+  - JWT Decode
+  - Axios
   - Vite
 
 - Backend:
@@ -26,6 +32,10 @@ A real-time chat application built with React, TypeScript, Socket.IO, and Materi
   - Express
   - Socket.IO
   - TypeScript
+  - JWT
+  - Prisma
+  - PostgreSQL
+  - bcrypt
 
 ## Project Structure
 
@@ -35,18 +45,30 @@ project/
 │   ├── src/
 │   │   ├── components/
 │   │   │   ├── ChatRoom.tsx
-│   │   │   └── Login.tsx
+│   │   │   ├── Login.tsx
+│   │   │   └── Register.tsx
 │   │   ├── context/
-│   │   │   └── SocketContext.tsx
+│   │   │   ├── SocketContext.tsx
+│   │   │   └── AuthContext.tsx
 │   │   ├── hooks/
-│   │   │   └── useSocket.ts
+│   │   │   ├── useSocket.ts
+│   │   │   └── useAuth.ts
+│   │   ├── api/
+│   │   │   └── auth.ts
+│   │   ├── config/
+│   │   │   └── index.ts
 │   │   ├── App.tsx
 │   │   └── main.tsx
 │   └── package.json
 │
 └── server/
     ├── src/
+    │   ├── auth.ts
+    │   ├── socket.ts
     │   └── index.ts
+    ├── prisma/
+    │   └── schema.prisma
+    ├── docker-compose.db.yaml
     └── package.json
 ```
 
@@ -57,68 +79,94 @@ project/
 git clone <repository-url>
 ```
 
-2. Install server dependencies
+2. Set up PostgreSQL database using Docker
 ```bash
 cd server
+docker compose -f docker-compose.db.yaml up -d
+```
+
+3. Install server dependencies and set up Prisma
+```bash
+npm install
+npx prisma generate
+npx prisma db push
+```
+
+4. Install client dependencies
+```bash
+cd ../client
 npm install
 ```
 
-3. Install client dependencies
-```bash
-cd client
-npm install
-```
-
-4. Start the server
-```bash
-cd server
-npm run dev
-```
-
-5. Start the client
-```bash
-cd client
-npm run dev
-```
-
-The client will run on `http://localhost:5173` and the server on `http://localhost:3000`
-
-## Environment Variables
-
-Create `.env` files in both client and server directories if needed:
+5. Create environment files:
 
 ```env
 # server/.env
 PORT=3000
+DATABASE_URL="postgresql://<db_user>:<db_password>@localhost:5432/<db_name>"
+JWT_SECRET="your-secret-key"
 
 # client/.env
 VITE_SERVER_URL=http://localhost:3000
 ```
 
-## Usage
+6. Start the development servers
+```bash
+# Terminal 1 - Server
+cd server
+npm run dev
 
-1. Open the application in your browser
-2. Open another tab in your browser
-3. Enter a username to join the chat in both tabs
-4. Start sending messages
-5. Use the disconnect button to leave the chat
+# Terminal 2 - Client
+cd client
+npm run dev
+```
+
+## Authentication Flow
+
+1. Register:
+- User enters username and password
+- Server hashes password and stores in database
+- Returns JWT token
+- Auto-login after registration
+
+2. Login:
+- User enters credentials
+- Server validates and returns JWT token
+- Token stored in sessionStorage (tab-specific)
+
+3. Socket Authentication:
+- Socket connections include JWT token
+- Server validates token before allowing connection
+- Username extracted from verified token
 
 ## Socket Events
 
 ### Client Events
-- `connect`: Initiated when joining the chat
-- `disconnect`: Triggered when leaving the chat
+- `connect`: Initiated with JWT authentication
+- `disconnect`: Triggered on logout or tab close
 - `send_message`: Emitted when sending a message
 
 ### Server Events
-- `connection`: Handles new client connections
+- `connection`: Handles new authenticated connections
 - `new_message`: Broadcasts messages to all clients
 - `disconnect`: Handles client disconnections
 
 ## Component Structure
 
+### AuthContext
+Manages authentication state and token:
+```typescript
+type AuthContextType = {
+  token: string | null;
+  username: string | null;
+  login: (token: string) => void;
+  logout: () => void;
+  isAuthenticated: boolean;
+};
+```
+
 ### SocketContext
-Manages Socket.IO connection and provides connection status to components:
+Manages Socket.IO connection with authentication:
 ```typescript
 type SocketContextType = {
   socket: Socket | null;
@@ -129,7 +177,7 @@ type SocketContextType = {
 ```
 
 ### ChatRoom
-Handles the chat interface and message management:
+Handles authenticated chat interface:
 ```typescript
 interface ChatMessage {
   id: string;
@@ -140,35 +188,17 @@ interface ChatMessage {
 }
 ```
 
-### Login
-Manages user authentication and entry to the chat:
-```typescript
-type LoginProps = {
-  onLogin: (username: string) => void;
-};
-```
-
-## Styling
-
-The application uses Material-UI's dark theme by default. Theme configuration:
-
-```typescript
-const theme = createTheme({
-  palette: {
-    mode: "dark",
-  },
-});
-```
-
 ## Future Improvements
 
-- Add user authentication
-- Persist messages
+- Add password reset functionality
+- Add email verification
+- Add user profiles
 - Add private messaging
-- Add emoji support
 - Add file sharing
 - Add typing indicators
 - Add read receipts
+- Add message persistence
 - Add user online status
 - Add message search
 - Add message reactions
+- Add group chat functionality
