@@ -2,8 +2,11 @@ import { createTheme, CssBaseline, ThemeProvider } from "@mui/material";
 import "./App.css";
 import { useState } from "react";
 import { Login } from "./components/Login";
+import { Register } from "./components/Register";
 import { ChatRoom } from "./components/ChatRoom";
 import { SocketProvider } from "./context/SocketContext";
+import { AuthProvider } from "./context/AuthContext";
+import { useAuth } from "./hooks/useAuth";
 
 const theme = createTheme({
   palette: {
@@ -11,24 +14,31 @@ const theme = createTheme({
   },
 });
 
+function AppContent() {
+  const [isRegisterView, setIsRegisterView] = useState(false);
+  const { isAuthenticated } = useAuth();
+
+  if (isAuthenticated) {
+    return <ChatRoom />;
+  }
+
+  return isRegisterView ? (
+    <Register onSwitchToLogin={() => setIsRegisterView(false)} />
+  ) : (
+    <Login onSwitchToRegister={() => setIsRegisterView(true)} />
+  );
+}
+
 function App() {
-  const [username, setUserName] = useState("");
-
-  const handleLogin = (username: string) => {
-    setUserName(username);
-  };
-
   return (
-    <SocketProvider>
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
-        {!username ? (
-          <Login onLogin={handleLogin} />
-        ) : (
-          <ChatRoom username={username} />
-        )}
-      </ThemeProvider>
-    </SocketProvider>
+    <AuthProvider>
+      <SocketProvider>
+        <ThemeProvider theme={theme}>
+          <CssBaseline />
+          <AppContent />
+        </ThemeProvider>
+      </SocketProvider>
+    </AuthProvider>
   );
 }
 

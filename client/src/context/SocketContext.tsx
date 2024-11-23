@@ -1,6 +1,7 @@
 import { createContext, useCallback, useEffect, useState } from "react";
 import { io, Socket } from "socket.io-client";
 import { config } from "../config";
+import { useAuth } from "../hooks/useAuth";
 
 type SocketContextType = {
   socket: Socket | null;
@@ -13,16 +14,20 @@ type SocketContextType = {
 export const SocketContext = createContext<SocketContextType | null>(null);
 
 export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
+  const { token } = useAuth();
   const [socket, setSocket] = useState<Socket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
 
-  const connect = useCallback((username: string) => {
-    const newSocket = io(config.serverUrl, {
-      auth: { username },
-    });
+  const connect = useCallback(
+    (username: string) => {
+      const newSocket = io(config.serverUrl, {
+        auth: { username, token },
+      });
 
-    setSocket(newSocket);
-  }, []);
+      setSocket(newSocket);
+    },
+    [token]
+  );
 
   const disconnect = useCallback(() => {
     if (socket) {

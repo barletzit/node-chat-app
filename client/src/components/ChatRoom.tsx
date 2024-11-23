@@ -1,6 +1,7 @@
 import { FormEvent, useEffect, useState } from "react";
 import { useSocket } from "../hooks/useSocket";
 import { Box, TextField, Button, Paper, Typography } from "@mui/material";
+import { useAuth } from "../hooks/useAuth";
 
 type ChatMessage = {
   id: string;
@@ -10,18 +11,15 @@ type ChatMessage = {
   type: "user" | "system";
 };
 
-type ChatRoomProps = {
-  username: string;
-};
-
-export const ChatRoom: React.FC<ChatRoomProps> = ({ username }) => {
+export const ChatRoom = () => {
+  const { username, logout } = useAuth();
   const { socket, connect, disconnect, isConnected } = useSocket();
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [hasConnectedBefore, setHasConnectedBefore] = useState(false);
 
   useEffect(() => {
-    if (!socket) {
+    if (!socket && username) {
       connect(username);
     }
   }, [socket, connect, username]);
@@ -65,12 +63,25 @@ export const ChatRoom: React.FC<ChatRoomProps> = ({ username }) => {
     }
   }, [hasConnectedBefore, isConnected, message.length]);
 
+  if (!username) {
+    return (
+      <Box sx={{ p: 3, textAlign: "center" }}>
+        <Typography>Loading...</Typography>
+      </Box>
+    );
+  }
+
   const handleSend = (e: FormEvent) => {
     e.preventDefault();
     if (!message.trim() || !socket) return;
 
     socket.emit("send_message", message);
     setMessage("");
+  };
+
+  const handleDisconnect = () => {
+    disconnect();
+    logout();
   };
 
   return (
@@ -96,7 +107,7 @@ export const ChatRoom: React.FC<ChatRoomProps> = ({ username }) => {
         <Button
           variant="outlined"
           color="error"
-          onClick={disconnect}
+          onClick={handleDisconnect}
           disabled={!isConnected}
         >
           Disconnect
