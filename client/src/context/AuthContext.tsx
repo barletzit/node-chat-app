@@ -42,12 +42,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setToken(null);
   };
 
-  // const getUsername = () => {
-  //   if (!token) return null;
-  //   const decoded = jwtDecode<DecodedToken>(token);
-  //   return decoded.username;
-  // };
-
   return (
     <AuthContext.Provider
       value={{
