@@ -51,7 +51,7 @@ export const ChatRoom: React.FC<ChatRoomProps> = ({ username }) => {
           type: "system",
         },
       ]);
-    } else if (message.length && !hasConnectedBefore) {
+    } else if (!isConnected && hasConnectedBefore) {
       setMessages((prev) => [
         ...prev,
         {
