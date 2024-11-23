@@ -4,7 +4,8 @@
   "scripts": {
     "dev": "tsx watch --env-file=.env src/index.ts",
     "start": "node --env-file=.env --import tsx src/index.ts",
-    "build": "tsc"
+    "build": "tsc",
+    "db:up": "docker compose -f docker-compose.db.yaml up -d"
   },
   "keywords": [],
   "author": "",
@@ -12,12 +13,17 @@
   "description": "",
   "devDependencies": {
     "@types/express": "^5.0.0",
+    "@types/jsonwebtoken": "^9.0.7",
     "@types/node": "^22.9.1",
+    "prisma": "^5.22.0",
     "tsx": "^4.19.2",
     "typescript": "^5.6.3"
   },
   "dependencies": {
+    "@prisma/client": "^5.22.0",
+    "cors": "^2.8.5",
     "express": "^4.21.1",
+    "jsonwebtoken": "^9.0.2",
     "socket.io": "^4.8.1"
   }
 }

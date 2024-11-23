@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   Box,
   TextField,
@@ -6,17 +6,17 @@ import {
   Container,
   Typography,
   Paper,
-  Alert,
   Link,
+  Alert,
 } from "@mui/material";
 import { useAuth } from "../hooks/useAuth";
-import { login as loginApi } from "../api/auth";
+import { register } from "../api/auth";
 
-type LoginProps = {
-  onSwitchToRegister: () => void;
+type RegisterProps = {
+  onSwitchToLogin: () => void;
 };
 
-export const Login: React.FC<LoginProps> = ({ onSwitchToRegister }) => {
+export const Register = ({ onSwitchToLogin }: RegisterProps) => {
   const { login } = useAuth();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -34,10 +34,10 @@ export const Login: React.FC<LoginProps> = ({ onSwitchToRegister }) => {
     setError("");
 
     try {
-      const token = await loginApi(username, password);
+      const token = await register(username, password);
       login(token);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Login failed");
+      setError(err instanceof Error ? err.message : "Registration failed");
     } finally {
       setIsLoading(false);
     }
@@ -48,7 +48,7 @@ export const Login: React.FC<LoginProps> = ({ onSwitchToRegister }) => {
       <Box sx={{ marginTop: 8 }}>
         <Paper elevation={3} sx={{ p: 4, width: "100%" }}>
           <Typography component="h1" variant="h5" align="center" gutterBottom>
-            Login
+            Register
           </Typography>
 
           {error && (
@@ -83,18 +83,18 @@ export const Login: React.FC<LoginProps> = ({ onSwitchToRegister }) => {
               sx={{ mt: 3 }}
               disabled={isLoading}
             >
-              {isLoading ? "Logging in..." : "Login"}
+              {isLoading ? "Registering..." : "Register"}
             </Button>
 
             <Box sx={{ mt: 2, textAlign: "center" }}>
               <Typography variant="body2">
-                Don't have an account?{" "}
+                Already have an account?{" "}
                 <Link
                   component="button"
                   variant="body2"
-                  onClick={onSwitchToRegister}
+                  onClick={onSwitchToLogin}
                 >
-                  Register here
+                  Login here
                 </Link>
               </Typography>
             </Box>
