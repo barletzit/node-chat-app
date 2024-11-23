@@ -15,10 +15,10 @@ const handleRegister = async (req, res) => {
       });
     }
 
-    const { hashedPassword } = generatePassword(password);
+    const { hashedPassword, salt } = generatePassword(password);
 
     const user = await prisma.user.create({
-      data: { username, password: hashedPassword },
+      data: { username, password: hashedPassword, salt },
     });
 
     const token = generateToken(user);
@@ -32,15 +32,18 @@ const handleRegister = async (req, res) => {
 
 const handleLogin = async (req, res) => {
   const { username, password } = req.body;
-  const { hashedPassword, salt } = generatePassword(password);
-  const isPasswordValid = validPassword(password, hashedPassword, salt);
 
   try {
-    const user = await prisma.user.findUnique({ where: { username } });
+    const user = await prisma.user.findUnique({
+      where: { username },
+      select: { id: true, username: true, password: true, salt: true },
+    });
 
     if (!user) {
       return res.status(401).json({ message: "Invalid credentials" });
     }
+
+    const isPasswordValid = validPassword(password, user.password, user.salt);
 
     if (!isPasswordValid) {
       return res.status(401).json({ message: "Invalid credentials" });

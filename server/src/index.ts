@@ -1,7 +1,9 @@
 import express from "express";
 import { Server } from "socket.io";
 import http from "http";
+import cors from "cors";
 import { handleLogin, handleRegister } from "./auth";
+import { handleSocket } from "./socket";
 
 type ChatMessage = {
   id: string;
@@ -17,14 +19,17 @@ const app = express();
 
 const server = http.createServer(app);
 
+const corsOptions = {
+  origin: "http://localhost:5173",
+  methods: ["GET", "POST"],
+  credentials: true,
+};
+
 const io = new Server(server, {
-  cors: {
-    origin: "http://localhost:5173",
-    methods: ["GET", "POST"],
-    credentials: true,
-  },
+  cors: corsOptions,
 });
 
+app.use(cors(corsOptions));
 app.use(express.json());
 
 app.get("/", (req, res) => {
@@ -33,6 +38,8 @@ app.get("/", (req, res) => {
 
 app.post("/auth/register", handleRegister);
 app.post("/auth/login", handleLogin);
+
+io.use(handleSocket);
 
 io.on("connection", (socket) => {
   const username = socket.handshake.auth.username;
